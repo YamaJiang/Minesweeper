@@ -26,11 +26,14 @@ public class Minesweeper{
     JLabel textLabel= new JLabel();
     JPanel textPanel= new JPanel();
     JPanel boardPanel= new JPanel();
+    int mineCount=8;
+    Random random= new Random();
     //2D array to store mine tiles
     MineTile[][] board= new MineTile[numRows][numCols];
     ArrayList<MineTile> mineList;
     int tilesClicked=0;
-    
+    boolean gameOver= false; 
+
 
     Minesweeper(){
         //frame.setVisible(true);
@@ -42,7 +45,7 @@ public class Minesweeper{
 
         textLabel.setFont(new Font("Arial", Font.BOLD,25));
         textLabel.setHorizontalAlignment(JLabel.CENTER);
-        textLabel.setText("Minesweeper");
+        textLabel.setText("Minesweeper: "+ Integer.toString(mineCount));
         textLabel.setOpaque(true);
 
         textPanel.setLayout(new BorderLayout());
@@ -66,6 +69,9 @@ public class Minesweeper{
                 {
                   @Override
                   public void mousePressed(MouseEvent e){
+                    if(gameOver){
+                        return;
+                    }
                     MineTile tile=(MineTile)e.getSource();
 
                     //leftclick
@@ -100,12 +106,17 @@ public class Minesweeper{
     void setMines(){
         mineList=new ArrayList<MineTile>();
 
-        mineList.add(board[2][2]);
-        mineList.add(board[2][3]);
-        mineList.add(board[5][6]);
-        mineList.add(board[3][4]);
-        mineList.add(board[1][1]);
+        int mineLeft=mineCount; 
+        while(mineLeft>0){
+            int r= random.nextInt(numRows);
+            int c= random.nextInt(numCols);
 
+            MineTile tile= board[r][c];
+            if(!mineList.contains(tile)){
+                mineList.add(tile);
+                mineLeft-=1; 
+            }
+        }
     }
     void revealMines(){
         for(int i=0; i<mineList.size();i++)
@@ -113,6 +124,8 @@ public class Minesweeper{
             MineTile tile=mineList.get(i);
             tile.setText("💣");
         }
+        gameOver=true; 
+        textLabel.setText("Game Over!");
     }
     void checkMine(int r, int c){
         if (r< 0 ||r >= numRows|| c < 0|| c>= numCols) {
@@ -125,6 +138,7 @@ public class Minesweeper{
             return;
         }
         tile.setEnabled(false);
+        tilesClicked+=1;
 
         int minesFound=0;
 
@@ -154,6 +168,10 @@ public class Minesweeper{
             checkMine(r+1,c-1);    //bottom left
             checkMine(r+1,c);      //bottom
             checkMine(r+1,c+1);    //bottom right
+        }
+        if(tilesClicked==numRows*numCols- mineList.size()){
+            gameOver=true; 
+            textLabel.setText("Mines Cleared!");
         }
        
 
