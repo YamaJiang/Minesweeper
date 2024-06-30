@@ -29,6 +29,8 @@ public class Minesweeper{
     //2D array to store mine tiles
     MineTile[][] board= new MineTile[numRows][numCols];
     ArrayList<MineTile> mineList;
+    int tilesClicked=0;
+    
 
     Minesweeper(){
         //frame.setVisible(true);
@@ -77,7 +79,14 @@ public class Minesweeper{
                                 checkMine(tile.r,tile.c);
                             }
                         }
-                        
+                    }
+                    else if(e.getButton()==MouseEvent.BUTTON3){
+                        if(tile.getText()==""&&tile.isEnabled()){
+                            tile.setText("🚩");
+                        }
+                        else if(tile.getText()=="🚩"){
+                            tile.setText("");
+                        }
                     }
                   }
                 });
@@ -106,7 +115,15 @@ public class Minesweeper{
         }
     }
     void checkMine(int r, int c){
+        if (r< 0 ||r >= numRows|| c < 0|| c>= numCols) {
+            return;
+        }
+       
         MineTile tile= board[r][c];
+        if(!tile.isEnabled())
+        {
+            return;
+        }
         tile.setEnabled(false);
 
         int minesFound=0;
@@ -118,16 +135,27 @@ public class Minesweeper{
         minesFound+=countMine(r, c-1); //left
         minesFound+=countMine(r,c+1); //right
 
-        minesFound+=countMine(r+1, c-1);
-        minesFound+=countMine(r+1, c);
-        minesFound+=countMine(r+1, c+1);
+        minesFound+=countMine(r+1,c-1);
+        minesFound+=countMine(r+1,c);
+        minesFound+=countMine(r+1,c+1);
 
         if(minesFound>0){
             tile.setText(Integer.toString(minesFound));
         }
         else{
             tile.setText("");
+            checkMine(r-1,c-1);    //top left
+            checkMine(r-1,c);      //top
+            checkMine(r-1,c+1);    //top right
+
+            checkMine(r,c-1);      //left
+            checkMine(r,c+1);      //right
+
+            checkMine(r+1,c-1);    //bottom left
+            checkMine(r+1,c);      //bottom
+            checkMine(r+1,c+1);    //bottom right
         }
+       
 
     }
     int countMine(int r, int c) {
